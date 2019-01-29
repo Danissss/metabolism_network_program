@@ -2,20 +2,31 @@ package som;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.io.iterator.IteratingSDFReader;
+import org.openscience.cdk.io.listener.PropertiesListener;
+import org.openscience.cdk.layout.StructureDiagramGenerator;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -157,6 +168,130 @@ public class CreateSomModel {
 		return null;
 		
 	}
+	
+	/**
+	 * parse the smiles
+	 * if the input is smiles string, parse it to mole
+	 * if it is mol or sdf file, parse it to mole
+	 * @param smiles
+	 * @return
+	 * @throws CDKException 
+	 * @throws IOException 
+	 */
+	
+	
+	public static HashMap<IAtomContainer, Instances> create_test_instance(String input) throws CDKException, IOException {
+		
+		
+		int nearest_atom = 3;
+		
+		IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
+		IAtomContainer mole = builder.newInstance(IAtomContainer.class);
+		HashMap<IAtomContainer, Instances> hash_instance = new HashMap<IAtomContainer, Instances>();
+		ArrayList<Instance> instance_list = new ArrayList<Instance>();
+		
+	    // check if the input is sdf // or smiles;
+	    if(input.contains(".sdf") || input.contains(".mol")) {
+	    		mole = read_SDF_file(input);
+	    }else {
+	    		SmilesParser temp_smiles = new SmilesParser(builder);
+		 	IAtomContainer atom_container = temp_smiles.parseSmiles(input);
+		 	AtomContainerManipulator.suppressHydrogens(atom_container);
+			AtomContainerManipulator.convertImplicitToExplicitHydrogens(atom_container);
+		
+		 	StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+			sdg.setMolecule(atom_container);
+			sdg.generateCoordinates();
+			mole = sdg.getMolecule();
+	    }
+	    
+	    
+	    ArrayList<Attribute> attribute_name = generate_attribute_name(nearest_atom+1, 29); 
+	     
+	    FastVector<String> association = new FastVector<String>();
+	    association.addElement("Yes");
+		association.addElement("No");
+		Attribute class_attribute = new Attribute("Class",association);
+		attribute_name.add(class_attribute);
+		 
+		Instances test_instance = new Instances("Rel",attribute_name,mole.getAtomCount());
+		
+		test_instance.setClassIndex(class_attribute.index());
+	    
+	    ArrayList<ArrayList<String>> all_nearest_atom_set = GetAtomicDescriptors.getNearestAtoms(mole);
+	    
+	    int num_atom = mole.getAtomCount();
+		for(int atoms = 0; atoms < num_atom; atoms++) {
+			
+			
+		}
+		
+		for(int k = 0; k< num_atom; k++) {
+
+			
+			// iterate each instance;
+			// convert each instance to weka instance;
+			
+			ArrayList<String> nearest_atom_set = all_nearest_atom_set.get(k);   // get index of atom but need to minus 1 because of chemsketch
+			List<IAtom> atoms_set = new ArrayList<IAtom>();
+			
+			// add the # nearest atom into atom list for extract the atom descriptor;
+			atoms_set.add(mole.getAtom(k));  									// add the original atoms
+			for(int nna = 0; nna < nearest_atom; nna++) {
+				IAtom tmp_atom = mole.getAtom(Integer.parseInt(nearest_atom_set.get(nna)));
+				atoms_set.add(tmp_atom);
+			}
+			
+			ArrayList<Double[]> descriptor_value = GetAtomicDescriptors.getAtomicDescriptor(mole,atoms_set, "");
+
+			
+			ArrayList<String> single_instance_value = new ArrayList<String>();
+			for(int dv = 0; dv < descriptor_value.size(); dv++) {
+				for (int dv2 = 0; dv2<descriptor_value.get(dv).length; dv2++) {
+					single_instance_value.add(Double.toString(descriptor_value.get(dv)[dv2]));
+				}
+			}
+			
+			single_instance_value.add("?");
+			
+			
+			// feature_set is for each temp feature.
+			int num_of_attribute = test_instance.numAttributes();
+			Instance feature_set = new DenseInstance(num_of_attribute); 
+    		 
+    		 	for(int f=0; f < num_of_attribute; f++) {
+    		 		Attribute tmp_attr = attribute_name.get(f);
+    		 		if(tmp_attr.isNumeric()) {
+    		 			feature_set.setValue(tmp_attr,Double.parseDouble(single_instance_value.get(f)));
+//    		 			feature_set.setValue(tmp_attr, single_instance_value.get(f));
+    		 		}else if (tmp_attr.isNominal()) {
+    		 			feature_set.setValue(tmp_attr, single_instance_value.get(f));
+    		 		}
+    			 
+    		 	}
+    		 
+    		 	test_instance.add(feature_set);
+			
+		}
+		
+		hash_instance.put(mole,test_instance);
+	    
+	    
+	    
+	    // return the HashMap<IAtomContainer, Instances>
+		// each Instances contain descriptor value of each atom
+		// in prediction
+		// test if the instance has the site.
+		
+		return hash_instance;
+		
+		
+	}
+	
+	
+	
+	
+	
 	/**
 	 * why the clear() will clear the stuff even after insert into map
 	 * dataList.add(map) will put a reference to map in the list, so it's not a copy. 
@@ -844,7 +979,12 @@ public class CreateSomModel {
 		
 	}
 	
-	
+	/**
+	 * 
+	 * @param factor
+	 * @param num_of_descriptor
+	 * @return
+	 */
 	public static ArrayList<Attribute> generate_attribute_name(int factor, int num_of_descriptor){
 		
 		ArrayList<Attribute> attribute = new ArrayList<Attribute>();
@@ -858,6 +998,33 @@ public class CreateSomModel {
 		
 		return attribute;
 		
+	}
+	
+	/**
+	 * 
+	 * @param pathToInputFile
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws CDKException
+	 */
+	public static IAtomContainer read_SDF_file(String pathToInputFile)
+			throws FileNotFoundException, CDKException {
+		IChemObjectBuilder bldr = SilentChemObjectBuilder.getInstance();
+		IteratingSDFReader sdfr = new IteratingSDFReader(new FileReader(pathToInputFile),
+				bldr);
+		Properties prop = new Properties();
+		prop.setProperty("ForceReadAs3DCoordinates", "true");
+		PropertiesListener listener = new PropertiesListener(prop);
+		sdfr.addChemObjectIOListener(listener);
+		sdfr.customizeJob();
+		IAtomContainerSet MOLS = DefaultChemObjectBuilder.getInstance().newInstance(
+				IAtomContainerSet.class);
+		while (sdfr.hasNext())
+				MOLS.addAtomContainer(sdfr.next());
+		
+		IAtomContainer mole = MOLS.getAtomContainer(0);
+		return mole;
+
 	}
 	
 	
