@@ -13,6 +13,7 @@ import org.openscience.cdk.qsar.DescriptorEngine;
 import org.openscience.cdk.qsar.IAtomicDescriptor;
 import org.openscience.cdk.qsar.IDescriptor;
 import org.openscience.cdk.qsar.descriptors.atomic.IPAtomicLearningDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.WienerNumbersDescriptor;
 import org.openscience.cdk.qsar.result.BooleanResult;
 import org.openscience.cdk.qsar.result.DoubleArrayResult;
 import org.openscience.cdk.qsar.result.DoubleResult;
@@ -24,7 +25,7 @@ import org.openscience.cdk.tools.HOSECodeGenerator;
 public class GetAtomicDescriptors {
 	
 
-	static List<String> classNames = DescriptorEngine.getDescriptorClassNameByPackage("org.openscience.cdk.qsar.descriptors.molecular",
+	static List<String> classNames = DescriptorEngine.getDescriptorClassNameByPackage("org.openscience.cdk.qsar.descriptors.atomic",
             null);
 	private static  DescriptorEngine ENGINE = new DescriptorEngine(classNames, null);
 
@@ -106,6 +107,7 @@ public class GetAtomicDescriptors {
 		
 		
 		// get each descriptors
+//		int num_descriptor = 0;
 		for (IDescriptor desc : descriptors) {
 			if (desc instanceof IPAtomicLearningDescriptor)
 				continue;
@@ -144,8 +146,10 @@ public class GetAtomicDescriptors {
 			catch (Exception e){
 				System.out.println(mole.getTitle());
 			}
+//			num_descriptor++;
 				
 		}
+//		System.out.println("Number of Descriptors: " + num_descriptor); // 29
 		return values;
 	}
 

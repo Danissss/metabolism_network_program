@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class CreateSomModel {
 		String[] enzyme_name = new String[] {"1A2","2A6","2B6","2C8","2C9","2C19","2D6","2E1","3A4"}; 
 		
 		
-		ArrayList<Attribute> attribute_name = generate_attribute_name(nearest_atom+1, 29); // return 4*29=116 attribute name;
+		
 	    
 		 
 		for(int i = 0; i< dataset.size(); i++) {
@@ -55,6 +56,7 @@ public class CreateSomModel {
 			
 			
 			// create the instance and attribute
+			ArrayList<Attribute> attribute_name = generate_attribute_name(nearest_atom+1, 29); // return 4*29=116 attribute name;
 			FastVector<String> association = new FastVector<String>();
 		    association.addElement("Yes");
 			association.addElement("No");
@@ -76,10 +78,15 @@ public class CreateSomModel {
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> row = som_array.get(j);
 				for (Map.Entry<IAtomContainer, ArrayList<ArrayList<String>>> entry : row.entrySet()){
 					IAtomContainer mole = entry.getKey();
+//					System.out.println(mole.getTitle());
 					int num_atom = mole.getAtomCount();
 					ArrayList<ArrayList<String>> all_nearest_atom_set = GetAtomicDescriptors.getNearestAtoms(mole);  // return nearest atom list in atom order
 					ArrayList<ArrayList<String>> instances = entry.getValue();
+//					instances contain list of instance; each instance contain atom index and yes or no
+//					System.out.println(instances.size());
+//					for each instance, 
 					for(int k = 0; k<instances.size(); k++) {
+
 						
 						// iterate each instance;
 						// convert each instance to weka instance;
@@ -89,7 +96,7 @@ public class CreateSomModel {
 						List<IAtom> atoms_set = new ArrayList<IAtom>();
 						
 						// add the # nearest atom into atom list for extract the atom descriptor;
-						atoms_set.add(mole.getAtom(som));  									// add the original atoms
+						atoms_set.add(mole.getAtom(som-1));  									// add the original atoms
 						for(int nna = 0; nna < nearest_atom; nna++) {
 							IAtom tmp_atom = mole.getAtom(Integer.parseInt(nearest_atom_set.get(nna)));
 							atoms_set.add(tmp_atom);
@@ -116,7 +123,8 @@ public class CreateSomModel {
 			    		 	for(int f=0; f < num_of_attribute; f++) {
 			    		 		Attribute tmp_attr = attribute_name.get(f);
 			    		 		if(tmp_attr.isNumeric()) {
-			    		 			feature_set.setValue(tmp_attr, single_instance_value.get(f));
+			    		 			feature_set.setValue(tmp_attr,Double.parseDouble(single_instance_value.get(f)));
+//			    		 			feature_set.setValue(tmp_attr, single_instance_value.get(f));
 			    		 		}else if (tmp_attr.isNominal()) {
 			    		 			feature_set.setValue(tmp_attr, single_instance_value.get(f));
 			    		 		}
@@ -141,13 +149,20 @@ public class CreateSomModel {
 			
 			
 			System.out.println(arff_path+" finished!======================!");
+			
+//			new_instance.clear();
+//			attribute_name.clear();
 		}
 		
 		return null;
 		
 	}
 	/**
-	 * 
+	 * why the clear() will clear the stuff even after insert into map
+	 * dataList.add(map) will put a reference to map in the list, so it's not a copy. 
+	 * When you then do map.clear() afterwards, it erases the content of the map in the list too, 
+	 * because it is the very same object. Do dataList.add(map.clone()) instead or (preferably) 
+	 * do map = new HashMap<>(); afterwards.
 	 * 
 	 * @return 3D arraylist
 	 * @throws FileNotFoundException
@@ -170,18 +185,7 @@ public class CreateSomModel {
 		ArrayList<HashMap<IAtomContainer,ArrayList<ArrayList<String>>>> hash_2E1 = new ArrayList<HashMap<IAtomContainer,ArrayList<ArrayList<String>>>>();
 		ArrayList<HashMap<IAtomContainer,ArrayList<ArrayList<String>>>> hash_3A4 = new ArrayList<HashMap<IAtomContainer,ArrayList<ArrayList<String>>>>();
 		
-		
-		ArrayList<ArrayList<String>> list_1A2 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_2A6 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_2B6 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_2C8 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_2C9 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_2C19 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_2D6 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_2E1 = new ArrayList<ArrayList<String>>();
-		ArrayList<ArrayList<String>> list_3A4 = new ArrayList<ArrayList<String>>();
-		
-		
+
 		// hashmap<mol,ArrayList<ArrayList<>>
 		
 		
@@ -190,6 +194,16 @@ public class CreateSomModel {
 		IAtomContainerSet mol_set = sdftosample.readFile(som_sdf_file_path);
 		
 		for(int i=0; i<mol_set.getAtomContainerCount();i++) {
+			
+			ArrayList<ArrayList<String>> list_1A2 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_2A6 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_2B6 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_2C8 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_2C9 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_2C19 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_2D6 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_2E1 = new ArrayList<ArrayList<String>>();
+			ArrayList<ArrayList<String>> list_3A4 = new ArrayList<ArrayList<String>>();
 			
 			IAtomContainer mol = mol_set.getAtomContainer(i);
 //			CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mol.getBuilder());
@@ -233,96 +247,136 @@ public class CreateSomModel {
 //				System.out.println(entry.getKey() + "/" + entry.getValue());
 				
 				String key = entry.getKey().toString();
-				ArrayList<String> array_1A2 = new ArrayList<String>();
-				ArrayList<String> array_2A6 = new ArrayList<String>();
-				ArrayList<String> array_2B6 = new ArrayList<String>();
-				ArrayList<String> array_2C8 = new ArrayList<String>();
-				ArrayList<String> array_2C9 = new ArrayList<String>();
-				ArrayList<String> array_2C19 = new ArrayList<String>();
-				ArrayList<String> array_2D6 = new ArrayList<String>();
-				ArrayList<String> array_2E1 = new ArrayList<String>();
-				ArrayList<String> array_3A4 = new ArrayList<String>();
+				
+				
+				
+				
+				
+				
+				
+				
+				
 				
 				
 				if (key.contains("1A2")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_1A2.remove(value_int-1);
-					array_1A2.add(Integer.toString(value_int));
-					array_1A2.add("Yes");
-					list_1A2.add(array_1A2);		// add to the list_1A2 (ArrayList<ArrayList<String>>)
-					array_1A2.clear(); 			// clean the array_1A2
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_1A2 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_1A2.remove(value_int-1);
+						array_1A2.add(Integer.toString(value_int));
+						array_1A2.add("Yes");
+						list_1A2.add(array_1A2);		// add to the list_1A2 (ArrayList<ArrayList<String>>)
+//						System.out.println(array_1A2.toString());
+//						array_1A2.clear(); 			// clean the array_1A2; this will clear everything inside the list_1A2;
+					}
+					
+					
 					flag_1A2 = 1;
 				}
 				else if (key.contains("2A6")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_2A6.remove(value_int-1);
-					array_2A6.add(Integer.toString(value_int));
-					array_2A6.add("Yes");
-					list_2A6.add(array_2A6);
-					array_2A6.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_2A6 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_2A6.remove(value_int-1);
+						array_2A6.add(Integer.toString(value_int));
+						array_2A6.add("Yes");
+						list_2A6.add(array_2A6);
+					}
 					flag_2A6 = 1;
 				}
 				else if (key.contains("2B6")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_2B6.remove(value_int-1);
-					array_2B6.add(Integer.toString(value_int));
-					array_2B6.add("Yes");
-					list_2B6.add(array_2B6);
-					array_2B6.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_2B6 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_2B6.remove(value_int-1);
+						array_2B6.add(Integer.toString(value_int));
+						array_2B6.add("Yes");
+						list_2B6.add(array_2B6);
+					}
 					flag_2B6 = 1;
 				}
 				else if (key.contains("2C8")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_2C8.remove(value_int-1);
-					array_2C8.add(Integer.toString(value_int));
-					array_2C8.add("Yes");
-					list_2C8.add(array_2C8);
-					array_2C8.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_2C8 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_2C8.remove(value_int-1);
+						array_2C8.add(Integer.toString(value_int));
+						array_2C8.add("Yes");
+						list_2C8.add(array_2C8);
+					}
 					flag_2C8 = 1;
 				}
 				else if (key.contains("2C9")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_2C9.remove(value_int-1);
-					array_2C9.add(Integer.toString(value_int));
-					array_2C9.add("Yes");
-					list_2C9.add(array_2C9);
-					array_2C9.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_2C9 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_2C9.remove(value_int-1);
+						array_2C9.add(Integer.toString(value_int));
+						array_2C9.add("Yes");
+						list_2C9.add(array_2C9);
+					}
 					flag_2C9 = 1;
 				}
 				else if (key.contains("2C19")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_2C19.remove(value_int-1);
-					array_2C19.add(Integer.toString(value_int));
-					array_2C19.add("Yes");
-					list_2C19.add(array_2C19);
-					array_2C19.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_2C19 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_2C19.remove(value_int-1);
+						array_2C19.add(Integer.toString(value_int));
+						array_2C19.add("Yes");
+						list_2C19.add(array_2C19);
+					}
 					flag_2C19 = 1;
 				}
 				else if (key.contains("2D6")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_2D6.remove(value_int-1);
-					array_2D6.add(Integer.toString(value_int));
-					array_2D6.add("Yes");
-					list_2D6.add(array_2D6);
-					array_2D6.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_2D6 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_2D6.remove(value_int-1);
+						array_2D6.add(Integer.toString(value_int));
+						array_2D6.add("Yes");
+						list_2D6.add(array_2D6);
+					}
 					flag_2D6 = 1;
 				}
 				else if (key.contains("2E1")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_2E1.remove(value_int-1);
-					array_2E1.add(Integer.toString(value_int));
-					array_2E1.add("Yes");
-					list_2E1.add(array_2E1);
-					array_2E1.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_2E1 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_2E1.remove(value_int-1);
+						array_2E1.add(Integer.toString(value_int));
+						array_2E1.add("Yes");
+						list_2E1.add(array_2E1);
+					}
 					flag_2E1 = 1;
 				}
 				else if (key.contains("3A4")) {
-					int value_int = Integer.valueOf(entry.getValue().toString());
-					atom_list_3A4.remove(value_int-1);
-					array_3A4.add(Integer.toString(value_int));
-					array_3A4.add("Yes");
-					list_3A4.add(array_3A4);
-					array_3A4.clear();
+					String values = entry.getValue().toString();
+					String[] value_list = values.split(" ");
+					for(int vl = 0; vl<value_list.length; vl++) {
+						ArrayList<String> array_3A4 = new ArrayList<String>();
+						int value_int = Integer.valueOf(value_list[vl]);
+						atom_list_3A4.remove(value_int-1);
+						array_3A4.add(Integer.toString(value_int));
+						array_3A4.add("Yes");
+						list_3A4.add(array_3A4);
+					}
 					flag_3A4 = 1;
 				}
 				
@@ -331,29 +385,42 @@ public class CreateSomModel {
 			
 			// add negative instance.
 			if(flag_1A2==1) {
-				ArrayList<String> array_1A2 = new ArrayList<String>();
+				
 				for (int left_atom = 0; left_atom < atom_list_1A2.size();left_atom++) {
+					ArrayList<String> array_1A2 = new ArrayList<String>();
 					array_1A2.add(Integer.toString(atom_list_1A2.get(left_atom)));
 					array_1A2.add("No");
 					list_1A2.add(array_1A2);
-					array_1A2.clear();
+//					System.out.println(array_1A2.toString());
+//					array_1A2.clear();
 					
 				}
 				
+				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
+//				System.out.println("list_1A2.size(): "+list_1A2.size());
 				properties.put(mol,list_1A2);
 				hash_1A2.add(properties);
 				
-				
+//				for (Map.Entry<IAtomContainer, ArrayList<ArrayList<String>>> entry : properties.entrySet()){
+//					System.out.println("hashmap");
+//					ArrayList<ArrayList<String>> tmp = entry.getValue();
+//					System.out.println(tmp.size());
+//					
+//					for(int mm = 0; mm < tmp.size(); mm++) {
+//						System.out.println(tmp.get(mm).toString());
+//					}
+//					
+//				}
+//				System.out.println("====");
 			}
 			
 			if(flag_2A6 == 1) {
-				ArrayList<String> array_2A6 = new ArrayList<String>();
 				for (int left_atom = 0; left_atom < atom_list_2A6.size();left_atom++) {
+					ArrayList<String> array_2A6 = new ArrayList<String>();
 					array_2A6.add(Integer.toString(atom_list_2A6.get(left_atom)));
 					array_2A6.add("No");
 					list_2A6.add(array_2A6);
-					array_2A6.clear();
 				}
 				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
@@ -362,8 +429,8 @@ public class CreateSomModel {
 			}
 			
 			if(flag_2B6 == 1) {
-				ArrayList<String> array_2B6 = new ArrayList<String>();
 				for (int left_atom = 0; left_atom < atom_list_2B6.size();left_atom++) {
+					ArrayList<String> array_2B6 = new ArrayList<String>();
 					array_2B6.add(Integer.toString(atom_list_2B6.get(left_atom)));
 					array_2B6.add("No");
 					list_2B6.add(array_2B6);
@@ -375,12 +442,11 @@ public class CreateSomModel {
 			}
 			
 			if(flag_2C8 == 1) {
-				ArrayList<String> array_2C8 = new ArrayList<String>();
 				for (int left_atom = 0; left_atom < atom_list_2C8.size();left_atom++) {	
+					ArrayList<String> array_2C8 = new ArrayList<String>();
 					array_2C8.add(Integer.toString(atom_list_2C8.get(left_atom)));
 					array_2C8.add("No");
 					list_2C8.add(array_2C8);
-					array_2C8.clear();
 				}
 				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
@@ -389,12 +455,11 @@ public class CreateSomModel {
 			}
 			
 			if(flag_2C9 == 1) {
-				ArrayList<String> array_2C9 = new ArrayList<String>();
 				for (int left_atom = 0; left_atom < atom_list_2C9.size();left_atom++) {
+					ArrayList<String> array_2C9 = new ArrayList<String>();
 					array_2C9.add(Integer.toString(atom_list_2C9.get(left_atom)));
 					array_2C9.add("No");
 					list_2C9.add(array_2C9);
-					array_2C9.clear();
 				}
 				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
@@ -403,12 +468,11 @@ public class CreateSomModel {
 			}
 			
 			if(flag_2C19 == 1) {
-				ArrayList<String> array_2C19 = new ArrayList<String>();
 				for (int left_atom = 0; left_atom < atom_list_2C19.size();left_atom++) {
+					ArrayList<String> array_2C19 = new ArrayList<String>();
 					array_2C19.add(Integer.toString(atom_list_2C19.get(left_atom)));
 					array_2C19.add("No");
 					list_2C19.add(array_2C19);
-					array_2C19.clear();
 				}
 				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
@@ -416,13 +480,12 @@ public class CreateSomModel {
 				hash_2C19.add(properties);
 			}
 			
-			if(flag_2D6 == 1) {
-				ArrayList<String> array_2D6 = new ArrayList<String>();
+			if(flag_2D6 == 1) {		
 				for (int left_atom = 0; left_atom < atom_list_2D6.size();left_atom++) {
+					ArrayList<String> array_2D6 = new ArrayList<String>();
 					array_2D6.add(Integer.toString(atom_list_2D6.get(left_atom)));
 					array_2D6.add("No");
 					list_2D6.add(array_2D6);
-					array_2D6.clear();
 				}
 				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
@@ -431,12 +494,11 @@ public class CreateSomModel {
 			}
 			
 			if(flag_2E1 == 1) {
-				ArrayList<String> array_2E1 = new ArrayList<String>();
 				for (int left_atom = 0; left_atom < atom_list_2E1.size();left_atom++) {
+					ArrayList<String> array_2E1 = new ArrayList<String>();
 					array_2E1.add(Integer.toString(atom_list_2E1.get(left_atom)));
 					array_2E1.add("No");
 					list_2E1.add(array_2E1);
-					array_2E1.clear();
 				}
 				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
@@ -444,13 +506,12 @@ public class CreateSomModel {
 				hash_2E1.add(properties);
 			}
 			
-			if(flag_3A4 == 1) {
-				ArrayList<String> array_3A4 = new ArrayList<String>();
+			if(flag_3A4 == 1) {	
 				for (int left_atom = 0; left_atom < atom_list_3A4.size();left_atom++) {
+					ArrayList<String> array_3A4 = new ArrayList<String>();
 					array_3A4.add(Integer.toString(atom_list_3A4.get(left_atom)));
 					array_3A4.add("No");
 					list_3A4.add(array_3A4);
-					array_3A4.clear();
 				}
 				
 				HashMap<IAtomContainer,ArrayList<ArrayList<String>>> properties = new HashMap<IAtomContainer,ArrayList<ArrayList<String>>>();
@@ -458,18 +519,23 @@ public class CreateSomModel {
 				hash_3A4.add(properties);
 			}
 			
-			list_1A2.clear();
-			list_2A6.clear();
-			list_2B6.clear();
-			list_2C8.clear();
-			list_2C9.clear();
-			list_2C19.clear();
-			list_2D6.clear();
-			list_2E1.clear();
-			list_3A4.clear();
 		}
 		
-		
+//		System.out.println("hash_1A2.size(): "+hash_1A2.size());
+//		HashMap<IAtomContainer,ArrayList<ArrayList<String>>> tmp_hash = hash_1A2.get(0);
+//		for (Map.Entry<IAtomContainer, ArrayList<ArrayList<String>>> entry : tmp_hash.entrySet()){
+//			System.out.println("hashmap");
+//			ArrayList<ArrayList<String>> tmp = entry.getValue();
+//			System.out.println(tmp.size());
+//			
+//			for(int mm = 0; mm < tmp.size(); mm++) {
+//				System.out.println(tmp.get(mm).toString());
+//			}
+//			
+//		}
+//		for (Map.Entry<IAtomContainer,ArrayList<ArrayList<String>>> entry : hash_1A2.entrySet()){
+//		
+//		}
 		
 		dataset.add(hash_1A2);
 		dataset.add(hash_2A6);
@@ -794,9 +860,11 @@ public class CreateSomModel {
 		
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException, CDKException {
+	
+	
+	public static void main(String[] args) throws CDKException, IOException {
 		
-//		create_phaseI_som_instance();
+		Instances new_instance = create_phaseI_som_instance();
 		
 	}
 }
