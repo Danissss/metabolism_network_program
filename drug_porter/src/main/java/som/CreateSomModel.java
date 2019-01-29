@@ -341,11 +341,14 @@ public class CreateSomModel {
 			ArrayList<ArrayList<String>> list_3A4 = new ArrayList<ArrayList<String>>();
 			
 			IAtomContainer mol = mol_set.getAtomContainer(i);
+			System.out.println(mol.getTitle());
 //			CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mol.getBuilder());
 			SmilesGenerator sg      = new SmilesGenerator(SmiFlavor.Isomeric);
 			String smi_mol     = sg.create(mol);
 			
 			
+			
+			// this contain the right order to atoms 
 			ArrayList<Integer> atom_list_1A2 = new ArrayList<Integer>();
 			for(int atom_num = 0; atom_num < mol.getAtomCount(); atom_num++) {
 				IAtom tmp_atom = mol.getAtom(atom_num);
@@ -399,7 +402,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_1A2 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_1A2.remove(value_int-1);
+						atom_list_1A2.remove(Integer.valueOf(value_int)); // this line remove the element based on the value
 						array_1A2.add(Integer.toString(value_int));
 						array_1A2.add("Yes");
 						list_1A2.add(array_1A2);		// add to the list_1A2 (ArrayList<ArrayList<String>>)
@@ -429,7 +432,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_2B6 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_2B6.remove(value_int-1);
+						atom_list_2B6.remove(Integer.valueOf(value_int));
 						array_2B6.add(Integer.toString(value_int));
 						array_2B6.add("Yes");
 						list_2B6.add(array_2B6);
@@ -442,7 +445,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_2C8 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_2C8.remove(value_int-1);
+						atom_list_2C8.remove(Integer.valueOf(value_int));
 						array_2C8.add(Integer.toString(value_int));
 						array_2C8.add("Yes");
 						list_2C8.add(array_2C8);
@@ -455,7 +458,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_2C9 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_2C9.remove(value_int-1);
+						atom_list_2C9.remove(Integer.valueOf(value_int));
 						array_2C9.add(Integer.toString(value_int));
 						array_2C9.add("Yes");
 						list_2C9.add(array_2C9);
@@ -468,7 +471,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_2C19 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_2C19.remove(value_int-1);
+						atom_list_2C19.remove(Integer.valueOf(value_int));
 						array_2C19.add(Integer.toString(value_int));
 						array_2C19.add("Yes");
 						list_2C19.add(array_2C19);
@@ -481,7 +484,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_2D6 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_2D6.remove(value_int-1);
+						atom_list_2D6.remove(Integer.valueOf(value_int));
 						array_2D6.add(Integer.toString(value_int));
 						array_2D6.add("Yes");
 						list_2D6.add(array_2D6);
@@ -494,7 +497,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_2E1 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_2E1.remove(value_int-1);
+						atom_list_2E1.remove(Integer.valueOf(value_int));
 						array_2E1.add(Integer.toString(value_int));
 						array_2E1.add("Yes");
 						list_2E1.add(array_2E1);
@@ -507,7 +510,7 @@ public class CreateSomModel {
 					for(int vl = 0; vl<value_list.length; vl++) {
 						ArrayList<String> array_3A4 = new ArrayList<String>();
 						int value_int = Integer.valueOf(value_list[vl]);
-						atom_list_3A4.remove(value_int-1);
+						atom_list_3A4.remove(Integer.valueOf(value_int));
 						array_3A4.add(Integer.toString(value_int));
 						array_3A4.add("Yes");
 						list_3A4.add(array_3A4);
