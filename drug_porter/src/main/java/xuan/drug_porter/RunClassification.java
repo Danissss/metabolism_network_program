@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -19,6 +22,8 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+
+import com.google.common.collect.Maps;
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -41,6 +46,8 @@ public class RunClassification {
 	
 	
 	protected static String current_dir = System.getProperty("user.dir");
+	private static HashMap<String, String> substrate_model_path = create_transporter_model_path("substrate");
+	private static HashMap<String, String> inhibitor_model_path = create_transporter_model_path("inhibitor");
 	private String sep = File.pathSeparator;
 	/*
 	 * ABCG2=BCRP=BCRP1: export: intestine_to_blood, brain_blood_barrier, liver_to_bile
@@ -131,25 +138,52 @@ public class RunClassification {
 	}
 	
 	
-	public static LinkedHashMap<String,String> run_classifier(String input, String transporter_name) throws Exception{
+	/**
+	 * return all transporter model result
+	 * @param instance
+	 * @return
+	 * @throws Exception 
+	 */
+	
+	public static HashMap<String,String> run_classifier_for_all_transporter(Instances instance) throws Exception {
 		
-		LinkedHashMap<String,String> classified_result = new LinkedHashMap<String,String>();
-		// list of model path; should around ~20 * 2 (both inhibitor and substrate model)
-		String MDR1_model_inhibitor = current_dir +"/Model/MDR1_RANDOMFOREST_INHIBITOR.model";
-		String MDR1_model_substrate = current_dir +"/Model/MDR1_RANDOMFOREST_SUBSTRATE.model";
+		HashMap<String,String> result =  new HashMap<String,String>();
+		String[] model_name = new String[] {"ABCB1"};
 		
-		Instances substrate_instance = generate_test_instance(input,"substrate");
-		Instances inhibitor_instance = generate_test_instance(input,"inhibitor");
-//		System.out.print(transporter_name);
-		if(transporter_name.contains("MDR1")) {
-//			System.out.print(transporter_name);
-			Classifier MDR1_substrate_model = (Classifier) weka.core.SerializationHelper.read(MDR1_model_substrate);
-			double substrate_result = MDR1_substrate_model.classifyInstance(substrate_instance.get(0));
-//			System.out.println(Double.toString(substrate_result));
-			Classifier MDR1_inhibitor_model = (Classifier) weka.core.SerializationHelper.read(MDR1_model_inhibitor);
-			double inhibitor_result = MDR1_inhibitor_model.classifyInstance(inhibitor_instance.get(0));
-			
-//			System.out.println(Double.toString(inhibitor_result));
+		for(int i=0 ; i<model_name.length; i++) {
+			String s_model_name = model_name[i];
+			HashMap<String,String> getback_result = run_classifier(instance,s_model_name);
+			for (Map.Entry<String,String> entry : getback_result.entrySet()){
+				result.put(entry.getKey(), entry.getValue());
+			}
+		}
+		
+		
+		return result;
+		
+		
+	}
+	
+	/**
+	 * Get single transporter model 
+	 * @param input
+	 * @param transporter_name
+	 * @return
+	 * @throws Exception
+	 */
+	public static HashMap<String,String> run_classifier(Instances instance, String transporter_name) throws Exception{
+		
+		HashMap<String,String> classified_result = new HashMap<String,String>();
+
+		
+//		Instances substrate_instance = generate_test_instance(input,"substrate");
+//		Instances inhibitor_instance = generate_test_instance(input,"inhibitor");
+
+		if(transporter_name.contains("ABCB1")) {
+			Classifier MDR1_substrate_model = (Classifier) weka.core.SerializationHelper.read(substrate_model_path.get(transporter_name));
+			double substrate_result = MDR1_substrate_model.classifyInstance(instance.get(0));
+			Classifier MDR1_inhibitor_model = (Classifier) weka.core.SerializationHelper.read(inhibitor_model_path.get(transporter_name));
+			double inhibitor_result = MDR1_inhibitor_model.classifyInstance(instance.get(0));
 			if(substrate_result == 0.0) {
 				classified_result.put("MDR1_substrate", "non-substrate");
 			}
@@ -207,7 +241,44 @@ public class RunClassification {
 
 	}
 	
-	/*
+	
+	public static HashMap<String,String> create_transporter_model_path(String sub_or_inh){
+		HashMap<String,String> model_map = new HashMap<String,String>();
+		if (sub_or_inh == "substrate") {
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_SUBSTRATE.model", current_dir,"ABCB1"));
+		}
+		else if(sub_or_inh == "inhibitor") {
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+			model_map.put("ABCB1", String.format("%s/Model/TransporterModel/%s_RANDOMFOREST_INHIBITOR.model", current_dir,"ABCB1"));
+		}
+		
+		
+		
+		
+		
+		return model_map;
+		
+		
+	}
+	/**
 	 * argument plan: either single transporter (by providing names) or all of them (by poviding "ALL" as arugment)
 	 * smiles
 	 * 
@@ -228,7 +299,8 @@ public class RunClassification {
 		else {
 			String transporter_name = args[1];
 			String input = args[0];
-			LinkedHashMap<String,String> result = run_classifier(input,transporter_name);
+			Instances instance = generate_test_instance(input,"substrate");
+			HashMap<String,String> result = run_classifier(instance,transporter_name);
 			for (String key : result.keySet()) {
 				String result_each = result.get(key).toString();
 				String result_key = key;
