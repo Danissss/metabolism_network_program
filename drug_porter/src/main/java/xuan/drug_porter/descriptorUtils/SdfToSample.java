@@ -6,8 +6,6 @@ package xuan.drug_porter.descriptorUtils;
  */
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -26,10 +24,7 @@ import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.io.listener.PropertiesListener;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
-import org.openscience.cdk.modeling.builder3d.ModelBuilder3D;
-import org.openscience.cdk.modeling.builder3d.TemplateHandler3D;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
-import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
