@@ -320,8 +320,8 @@ class BuildModel
 	// Random Forest
 	public static void run_random_forest(Instances training_instance, Instances test_instances,String model_type) throws Exception {
 		
-		
-		String model_path =  current_dir+"/tmp_file/RandomForest_"+model_type+".model";
+
+		String model_path =  current_dir+"/tmp_file/RANDOMFOREST_"+model_type.toUpperCase()+".model";
         
 		int num_attribute = training_instance.numAttributes();
 		for(int i = 0; i<num_attribute; i++) {

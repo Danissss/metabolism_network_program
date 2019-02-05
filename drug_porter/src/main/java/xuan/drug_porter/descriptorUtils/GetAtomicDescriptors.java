@@ -59,8 +59,7 @@ public class GetAtomicDescriptors {
 				distances[j] = distance;
 
 			}
-				
-				
+
 			// put the nearest atom at front
 			ArrayList<String> indices = new ArrayList<String>();
 			Double[] d = distances.clone(); // clone the original list (unsorted)

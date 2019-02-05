@@ -52,13 +52,13 @@ public class SomPrediction {
 		int nearest_atom = 3;
 		
 		IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
-		IAtomContainer mole = builder.newInstance(IAtomContainer.class);
+		IAtomContainer original_mole = builder.newInstance(IAtomContainer.class);
 //		HashMap<IAtomContainer, Instances> hash_instance = new HashMap<IAtomContainer, Instances>();
 //		ArrayList<Instance> instance_list = new ArrayList<Instance>();
 		
 	    // check if the input is sdf // or smiles;
 	    if(input.contains(".sdf") || input.contains(".mol")) {
-	    		mole = read_SDF_file(input);
+	    		original_mole = read_SDF_file(input);
 	    }else {
 	    		SmilesParser temp_smiles = new SmilesParser(builder);
 		 	IAtomContainer atom_container = temp_smiles.parseSmiles(input);
@@ -68,10 +68,13 @@ public class SomPrediction {
 		 	StructureDiagramGenerator sdg = new StructureDiagramGenerator();
 			sdg.setMolecule(atom_container);
 			sdg.generateCoordinates();
-			mole = sdg.getMolecule();
+			original_mole = sdg.getMolecule();
 	    }
-	    
-	    
+//	    System.out.println(mole.getAtomCount()); //read smiles string
+	    // add hydrogen 
+//	    AtomContainerManipulator.convertImplicitToExplicitHydrogens(mole);
+	    IAtomContainer mole = AtomContainerManipulator.removeHydrogens(original_mole);
+	    System.out.println(mole.getAtomCount());
 	    ArrayList<Attribute> attribute_name = generate_attribute_name(nearest_atom+1, 29); 
 	     
 	    FastVector<String> association = new FastVector<String>();
@@ -84,6 +87,7 @@ public class SomPrediction {
 		
 		test_instance.setClassIndex(class_attribute.index());
 	    
+		// getNearestAtoms may only works for 3d mol structure
 	    ArrayList<ArrayList<String>> all_nearest_atom_set = GetAtomicDescriptors.getNearestAtoms(mole);
 	    
 	    int num_atom = mole.getAtomCount();
@@ -118,7 +122,7 @@ public class SomPrediction {
 				}
 			}
 			
-			single_instance_value.add("?");
+			single_instance_value.add("No");
 			
 			
 			// feature_set is for each temp feature.
@@ -139,16 +143,9 @@ public class SomPrediction {
     		 	test_instance.add(feature_set);
 			
 		}
-		
-//		hash_instance.put(mole,test_instance);
-	    
-	    
-	    
-	    // return the HashMap<IAtomContainer, Instances>
-		// each Instances contain descriptor value of each atom
-		// in prediction
-		// test if the instance has the site.
-		
+		test_instance.instance(0).setClassMissing();
+//		System.out.println(test_instance.instance(0).toString());
+//		System.exit(0);
 		return test_instance;
 		
 		
@@ -178,6 +175,7 @@ public class SomPrediction {
 				MOLS.addAtomContainer(sdfr.next());
 		
 		IAtomContainer mole = MOLS.getAtomContainer(0);
+		
 		return mole;
 
 	}
@@ -212,10 +210,8 @@ public class SomPrediction {
 	 * @param model_type
 	 * @throws Exception 
 	 */
-	public static HashMap<Integer,String> runSomClassifier(String input, String model_type) throws Exception {
+	public static HashMap<Integer,String> runSomClassifier(Instances instance, String model_type) throws Exception {
 		
-		
-		Instances instance = create_test_instance(input);
 		HashMap<Integer,String> result = new HashMap<Integer,String>();
 		
 		if(model_type == "CYP1A2") {
@@ -272,9 +268,9 @@ public class SomPrediction {
 		for(int i=0; i< data_instance.size(); i++) {
 			double single_result = model.classifyInstance(data_instance.instance(i));
 			if(single_result == 1.0) {
-				result.put(i, "Yes");
-			}else {
 				result.put(i, "No");
+			}else {
+				result.put(i, "Yes");
 			}
 		}
 		return result;
@@ -287,22 +283,29 @@ public class SomPrediction {
 	 */
 	public static HashMap<String, String> CypModelPath(){
 		HashMap<String, String> maps = new HashMap<String,String>();
-		maps.put("CYP1A2", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP1A2"));
-		maps.put("CYP2A6", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP2A6"));
-		maps.put("CYP2B6", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP2B6"));
-		maps.put("CYP2C8", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP2C8"));
-		maps.put("CYP2C9", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP2C9"));
-		maps.put("CYP2C19", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP2C19"));
-		maps.put("CYP2D6", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP2D6"));
-		maps.put("CYP2E1", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP2E1"));
-		maps.put("CYP3A4", String.format("%s/Model/PhaseIModel/%s_RANDOMFOREST.model", current_dir,"CYP3A4"));
+		maps.put("CYP1A2", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP1A2"));
+		maps.put("CYP2A6", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP2A6"));
+		maps.put("CYP2B6", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP2B6"));
+		maps.put("CYP2C8", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP2C8"));
+		maps.put("CYP2C9", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP2C9"));
+		maps.put("CYP2C19", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP2C19"));
+		maps.put("CYP2D6", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP2D6"));
+		maps.put("CYP2E1", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP2E1"));
+		maps.put("CYP3A4", String.format("%s/Model/PhaseISOMModel/%s_RANDOMFOREST.model", current_dir,"CYP3A4"));
 		
 		return maps;
 		
 	}
 	
 	
-	public void main() {
+	public static void main(String[] args) throws Exception {
+		String test_smiles = "/Users/xuan/Desktop/HMDB00001.sdf";
+		Instances test_instance =  create_test_instance(test_smiles);
+		HashMap<Integer,String> result = runSomClassifier(test_instance,"CYP1A2");
+		for (Integer key : result.keySet()) {
+			String result_each = result.get(key).toString();
+			System.out.println(Integer.toString(key) +":"+ result_each);
+	    }
 		
 		
 	}

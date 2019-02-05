@@ -85,56 +85,56 @@ public class phase1react {
 		}
 		
 		else if(cyp.contains("1A2")){	
-			model = supportFoldPath + "supportfiles/CYP1A2/model/1A2_NR.model";
-			supportfile = supportFoldPath + "supportfiles/CYP1A2/supportfile.csv";
-			model = current_dir+"/Model/Phase1/1A2_NR.model";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP1A2/model/1A2_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP1A2/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makePrediction("1A2",model,testSet,supportfile,predictedResult );
 		}
 		else if(cyp.contains("3A4")){
-			model = supportFoldPath + "supportfiles/CYP3A4/model/3A4_NR.model";
-		
-			supportfile = supportFoldPath + "supportfiles/CYP3A4/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP3A4/model/3A4_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP3A4/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makePrediction("3A4",model,testSet,supportfile,predictedResult );
 		}
 		else if(cyp.contains("2C9")){			
-			supportfile = supportFoldPath + "supportfiles/CYP2C9/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP2C9/model/2C9_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2C9/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makeEnsemblePrediction("2C9",testSet,supportFoldPath,supportfile,predictedResult );
 		}
 		else if(cyp.contains("2C19")){
-			model = supportFoldPath + "supportfiles/CYP2C19/model/2C19_NR.model";
-			supportfile = supportFoldPath + "supportfiles/CYP2C19/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP2C19/model/2C19_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2C19/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makePrediction("2C19",model,testSet,supportfile,predictedResult );
 		}
 		else if(cyp.contains("2E1")){
-			model = supportFoldPath + "supportfiles/CYP2E1/model/2E1_NR.model";			
-			supportfile = supportFoldPath + "supportfiles/CYP2E1/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP2E1/model/2E1_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2E1/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makePrediction("2E1",model,testSet,supportfile,predictedResult );
 		}
 		else if(cyp.contains("2D6")){
-			supportfile = supportFoldPath + "supportfiles/CYP2D6/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP2D6/model/2D6_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2D6/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makeEnsemblePrediction("2D6",testSet,supportFoldPath,supportfile,predictedResult );
 		}
 		else if(cyp.contains("2A6")){
-			model = supportFoldPath + "supportfiles/CYP2A6/model/2A6_NR.model";
-			supportfile = supportFoldPath + "supportfiles/CYP2A6/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP2C9/model/2C9_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2C9/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makePrediction("2A6",model,testSet,supportfile,predictedResult );
 		}
 		else if(cyp.contains("2B6")){
-			model = supportFoldPath + "supportfiles/CYP2B6/model/2B6_NR.model";
-			supportfile = supportFoldPath + "supportfiles/CYP2B6/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP2B6/model/2B6_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2B6/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makePrediction("2B6",model,testSet,supportfile,predictedResult);
 		}
 		else if(cyp.contains("2C8")){
-			model = supportFoldPath + "supportfiles/CYP2C8/model/2C8_NR.model";			
-			supportfile = supportFoldPath + "supportfiles/CYP2C8/supportfile.csv";
+			model = current_dir+"/Model/PhaseICypReactModel/CYP2C8/model/2C8_NR.model";
+			supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2C8/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			predictedResult = test.makePrediction("2C8",model,testSet,supportfile,predictedResult );
 		}
@@ -163,54 +163,56 @@ public class phase1react {
 	public ArrayList<HashMap<String,String>> makeMultiPrediction(String supportFoldPath, String cyp, Instances testSet, ArrayList<HashMap<String,String>> predictedResult) throws Exception{
 		ArrayList<HashMap<String,String>> resultList = predictedResult;
 		if(cyp.contains("1A2")){
-			String model = supportFoldPath + "supportfiles/CYP1A2/model/1A2_NR.model";
-			String supportfile = supportFoldPath + "supportfiles/CYP1A2/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP1A2/model/1A2_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP1A2/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("1A2",model, testSet,supportfile,resultList );
 		}
 		if(cyp.contains("3A4")){
-			String model = supportFoldPath + "supportfiles/CYP3A4/model/3A4_NR.model";
-			String supportfile = supportFoldPath + "supportfiles/CYP3A4/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP3A4/model/3A4_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP3A4/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("3A4",model,testSet,supportfile,resultList );
 		}
 		if(cyp.contains("2B6")){
-			String model = supportFoldPath + "supportfiles/CYP2B6/model/2B6_NR.model";
-			String supportfile = supportFoldPath + "supportfiles/CYP2B6/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP2B6/model/2B6_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2B6/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("2B6",model,testSet,supportfile,resultList );
 		}
 		if(cyp.contains("2E1")){
-			String model = supportFoldPath + "supportfiles/CYP2E1/model/2E1_NR.model";
-			String supportfile = supportFoldPath + "supportfiles/CYP2E1/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP2E1/model/2E1_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2E1/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("2E1",model,testSet,supportfile,resultList );
 		}
 		if(cyp.contains("2C9")){
-			String supportfile = supportFoldPath + "supportfiles/CYP2C9/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP2C9/model/2C9_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2C9/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makeEnsemblePrediction("2C9",testSet,supportFoldPath,supportfile,predictedResult );
 		}
 		if(cyp.contains("2C19")){
-			String model = supportFoldPath + "supportfiles/CYP2C19/model/2C19_NR.model";
-			String supportfile = supportFoldPath + "supportfiles/CYP2C19/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP2C19/model/2C19_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2C19/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("2C19",model,testSet,supportfile,resultList );
 		}
 		if(cyp.contains("2D6")){
-			String supportfile = supportFoldPath + "supportfiles/CYP2D6/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP2D6/model/2D6_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2D6/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makeEnsemblePrediction("2D6",testSet, supportFoldPath,supportfile,predictedResult);
 		}
 		if(cyp.contains("2C8")){
-			String model = supportFoldPath + "supportfiles/CYP2C8/model/2C8_NR.model";
-			String supportfile = supportFoldPath + "supportfiles/CYP2C8/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP2C8/model/2C8_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2C8/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("2C8",model,testSet,supportfile,resultList );
 		}
 		if(cyp.contains("2A6")){
-			String model = supportFoldPath + "supportfiles/CYP2A6/model/2A6_NR.model";
-			String supportfile = supportFoldPath +  "supportfiles/CYP2A6/supportfile.csv";
+			String model = current_dir+"/Model/PhaseICypReactModel/CYP2A6/model/2A6_NR.model";
+			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP2A6/supportfile.csv";
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("2A6",model,testSet,supportfile,resultList );
 		}
@@ -233,7 +235,8 @@ public class phase1react {
 		//Load the ensemble models
 		if(cyp == "2D6"){
 			for(int i = 0; i < 5; i++){
-				String model = supportFoldPath + "supportfiles/CYP" + cyp + "/model/" + cyp + "_NR_" + i +".model";
+				String model = current_dir+"/Model/PhaseICypReactModel/CYP"+cyp+"/model/"+cyp+"_NR_" + i +".model";
+//				String model = supportFoldPath + "supportfiles/CYP" + cyp + "/model/" + cyp + "_NR_" + i +".model";
 				Classifier cls = (Classifier) weka.core.SerializationHelper.read(model);
 				enSembles.add(cls);
 			}
@@ -241,7 +244,8 @@ public class phase1react {
 		}
 		if(cyp == "2C9"){
 			for(int i = 0; i < 6; i++){
-				String model = supportFoldPath + "supportfiles/CYP" + cyp + "/model/" + cyp + "_NR_" + i +".model";
+//				String model = supportFoldPath + "supportfiles/CYP" + cyp + "/model/" + cyp + "_NR_" + i +".model";
+				String model = current_dir+"/Model/PhaseICypReactModel/CYP"+cyp+"/model/"+cyp+"_NR_" + i +".model";
 				Classifier cls = (Classifier) weka.core.SerializationHelper.read(model);
 				enSembles.add(cls);
 			}
