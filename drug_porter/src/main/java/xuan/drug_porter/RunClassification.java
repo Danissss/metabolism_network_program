@@ -174,44 +174,30 @@ public class RunClassification {
 	public static HashMap<String,String> run_classifier(Instances instance, String transporter_name) throws Exception{
 		
 		HashMap<String,String> classified_result = new HashMap<String,String>();
-
 		
-//		Instances substrate_instance = generate_test_instance(input,"substrate");
-//		Instances inhibitor_instance = generate_test_instance(input,"inhibitor");
-
-		if(transporter_name.contains("ABCB1")) {
-			Classifier MDR1_substrate_model = (Classifier) weka.core.SerializationHelper.read(substrate_model_path.get(transporter_name));
-			double substrate_result = MDR1_substrate_model.classifyInstance(instance.get(0));
-			Classifier MDR1_inhibitor_model = (Classifier) weka.core.SerializationHelper.read(inhibitor_model_path.get(transporter_name));
-			double inhibitor_result = MDR1_inhibitor_model.classifyInstance(instance.get(0));
-			if(substrate_result == 0.0) {
-				classified_result.put("MDR1_substrate", "non-substrate");
-			}
-			else {
-				classified_result.put("MDR1_substrate", "substrate");
-			}
-			if(inhibitor_result == 0.0) {
-				classified_result.put("MDR1_inhibitor", "non-inhibitor");
-			}else {
-				classified_result.put("MDR1_inhibitor", "inhibitor");
-			}
-			
+		Classifier MDR1_substrate_model = (Classifier) weka.core.SerializationHelper.read(substrate_model_path.get(transporter_name));
+		double substrate_result = MDR1_substrate_model.classifyInstance(instance.get(0));
+		Classifier MDR1_inhibitor_model = (Classifier) weka.core.SerializationHelper.read(inhibitor_model_path.get(transporter_name));
+		double inhibitor_result = MDR1_inhibitor_model.classifyInstance(instance.get(0));
+		String substrate = String.format("%s_substrate", transporter_name);
+		String inhibitor = String.format("%s_inhibitor", transporter_name);
+		if(substrate_result == 0.0) {
+			classified_result.put(substrate, "non-substrate");
 		}
-		
-		
-		
-		
-		
-		
-		
+		else {
+			classified_result.put(substrate, "substrate");
+		}
+		if(inhibitor_result == 0.0) {
+			classified_result.put(inhibitor, "non-inhibitor");
+		}else {
+			classified_result.put(inhibitor, "inhibitor");
+		}
 		
 		return classified_result;
 		
-		
-		
-		
-		
 	}
+	
+	
 	
 	/**
 	 * Read the sdf file and generate a IAtomContainerSet that contains all molecules in it.
