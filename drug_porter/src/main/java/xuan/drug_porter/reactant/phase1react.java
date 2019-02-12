@@ -42,33 +42,18 @@ public class phase1react {
 	protected static String current_dir = System.getProperty("user.dir");
 	private String sep = File.pathSeparator;
 	
-	public static void main(String[] args) throws Exception{
-		if(args.length<4){
-			System.out.println("Don't have enough arguments");
-			return;
-		}
-		else if(args.length>4){
-			System.out.println("# of arguments is more than 4");
-			return;			
-		}
-		String supportFoldPath = args[0]; //Path of the folder of the supportfiles ( .model and supportfiles.csv)
-		String input = args[1]; //The path of the input .sdf/.csv file
-		String output = args[2]; //The path of the ouput file, it can be either a .sdf or a .csv file
-		String cyp = args[3]; //The target CYPs
 
-		
-		
-		
-	}
-	public void makePrediction(String supportFoldPath, String input, String output, String cyp) throws Exception {
+	public ArrayList<HashMap<String,String>> makePrediction(String supportFoldPath, String input, String cyp) throws Exception {
 		
 		
 		String[] cypList = cyp.split(","); 
 		SdfToSample sf = new SdfToSample();
 		phase1react test = new phase1react();
+		
 		IAtomContainerSet inputMolecules = sf.createIAtomContainerSet(input);
 		SdfToSample sdfTool = new SdfToSample();		
 		Instances testSet = sdfTool.generateAllInstances(inputMolecules);
+//		System.out.println(testSet.instance(0).toString());
 		String supportfile = "Determined by the input";
 		//The predictedResult ArrayList is used to store all 9 predicted results;
 		ArrayList<HashMap<String,String>> predictedResult = new ArrayList<HashMap<String,String>>();
@@ -140,15 +125,12 @@ public class phase1react {
 		}
 		else{
 			System.out.println("Be added soon");
-			return;
 		}
-		if(output.contains("sdf")){
-			test.outputResultIAtomContainerSet(inputMolecules, output, predictedResult);
-		}
-		else if(output.contains("csv")){
-			test.outPutCsv(inputMolecules, output, predictedResult);
-		}
-		else System.out.println("Cannot detect the output file format");
+		
+	
+		
+		return predictedResult;
+		
 	}
 	
 	/**
@@ -275,7 +257,7 @@ public class phase1react {
 		int countN = 0;
 		Instances matched = matchAttributes(testSet,attList,meanList,maxList,minList);
 		matched.setClassIndex(matched.numAttributes()-1);
-		System.out.println("--------------------------------------");
+//		System.out.println("--------------------------------------");
 		for(int i = 0; i<matched.size();i++){
 			counter++;
 			Instance oneSample = matched.get(i);
@@ -293,12 +275,12 @@ public class phase1react {
 		
 			if(result==0.0){
 				countN++;
-				System.out.println(cyp +", " +"Mole" + (i+1) + ": N");
+//				System.out.println(cyp +", " +"Mole" + (i+1) + ": N");
 				pred = "N";
 			}
 			else if(result == 1.0){
 				countR++;
-				System.out.println(cyp +", " +"Mole" + (i+1) + ": R");
+//				System.out.println(cyp +", " +"Mole" + (i+1) + ": R");
 				pred = "R";
 			}
 							
@@ -351,6 +333,8 @@ public class phase1react {
 		Instances matched = matchAttributes(testSet,attList,meanList,maxList,minList);
 		matched.setClassIndex(matched.numAttributes()-1);
 		System.out.println("--------------------------------------");
+//		System.out.println(matched.size()); // 0
+		
 		for(int i = 0; i<matched.size();i++){
 			counter++;
 			Instance oneSample = matched.get(i);
@@ -359,12 +343,12 @@ public class phase1react {
 		
 			if(result==0.0){
 				countT++;
-				System.out.println(cyp +", " +"Mole" + (i+1) +": N");
+//				System.out.println(cyp +", " +"Mole" + (i+1) +": N");
 				pred = "N";
 			}
 			else if(result == 1.0){
 				countR++;
-				System.out.println(cyp +", " +"Mole" + (i+1) + ": R");
+//				System.out.println(cyp +", " +"Mole" + (i+1) + ": R");
 				pred = "R";
 			}			
 			
