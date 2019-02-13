@@ -23,14 +23,14 @@ public class phase2react {
 	 * @throws Exception 
 	 */
 	
-	public static HashMap<String,String> run_classifier_for_all_transporter(Instances instance) throws Exception {
+	public static HashMap<String,String> RunClassifierForAll(Instances instance) throws Exception {
 		
 		HashMap<String,String> result =  new HashMap<String,String>();
 		String[] model_name = new String[] {"UGT","SULT","NAT","GST","COMT"};
 		
 		for(int i=0 ; i<model_name.length; i++) {
 			String s_model_name = model_name[i];
-			HashMap<String,String> getback_result = run_classifier(instance,s_model_name);
+			HashMap<String,String> getback_result = RunClassifier(instance,s_model_name);
 			for (Map.Entry<String,String> entry : getback_result.entrySet()){
 				result.put(entry.getKey(), entry.getValue());
 			}
@@ -44,12 +44,12 @@ public class phase2react {
 	
 	/**
 	 * Get single transporter model 
-	 * @param input
-	 * @param transporter_name
+	 * @param instance
+	 * @param enzyme_name
 	 * @return
 	 * @throws Exception
 	 */
-	public static HashMap<String,String> run_classifier(Instances instance, String enzyme_name) throws Exception{
+	public static HashMap<String,String> RunClassifier(Instances instance, String enzyme_name) throws Exception{
 		
 		HashMap<String,String> classified_result = new HashMap<String,String>();
 		Classifier model = (Classifier) weka.core.SerializationHelper.read(substrate_model_path.get(enzyme_name));

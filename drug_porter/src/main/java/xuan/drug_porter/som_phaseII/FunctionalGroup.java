@@ -48,7 +48,7 @@ public class FunctionalGroup {
 	 * @return
 	 * @throws Exception
 	 */
-	public static IAtomContainer add_phase2_group(IAtomContainer mole,  String enzyme_name,int som_site) throws Exception {
+	public static IAtomContainer AddPhase2Group(IAtomContainer mole,  String enzyme_name,int som_site) throws Exception {
 	
 		int start_index = new Integer(0);
 		String smiles_string = new String();
@@ -160,7 +160,7 @@ public class FunctionalGroup {
 		IAtomContainer mole = mole_set.getAtomContainer(0); // with hydrogen
 		IAtomContainer mole_no_h = AtomContainerManipulator.removeHydrogens(mole);
 
-		IAtomContainer ugt = add_phase2_group(mole_no_h,"UGT",14); // 16 but minus -1  = 15
+		IAtomContainer ugt = AddPhase2Group(mole_no_h,"UGT",14); // 16 but minus -1  = 15
 		
 		SmilesGenerator smigen = new SmilesGenerator(SmiFlavor.Isomeric);
 		String smi = smigen.create(ugt);

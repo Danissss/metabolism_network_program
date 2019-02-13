@@ -29,7 +29,8 @@
 	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/jmathplot.jar"/>
 	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/modbcum-e-1.0.9.jar"/>
 	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/modbcum-i-1.0.9.jar"/>
-	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/jchem-vis-18.10.0-8214.jar"/>
-	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/MarvinBeans.jar"/>
+	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/jchem-main-14.10.13.0.jar"/>
+	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/marvin-app-14.10.13.0.jar"/>
+	<classpathentry kind="lib" path="/Users/xuan/Desktop/JarFile/calculations-14.10.13.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

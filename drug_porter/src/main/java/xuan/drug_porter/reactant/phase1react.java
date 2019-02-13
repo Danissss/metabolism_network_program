@@ -43,7 +43,7 @@ public class phase1react {
 	private String sep = File.pathSeparator;
 	
 
-	public ArrayList<HashMap<String,String>> makePrediction(String supportFoldPath, String input, String cyp) throws Exception {
+	public static ArrayList<HashMap<String,String>> makePrediction(String supportFoldPath, String input, String cyp) throws Exception {
 		
 		
 		String[] cypList = cyp.split(","); 
@@ -135,6 +135,7 @@ public class phase1react {
 	
 	/**
 	 * Predict whether the given test molecules in the sdf/csv file are reactants. This is called when more than one Cyps are input
+	 * modified by Xuan: concatenate all the result into ArrayList<HashMap> 
 	 * @param supportFoldPath
 	 * @param cyp the input CYPs, spited by "," 
 	 * @param inputMolecules: The input compounds
@@ -144,6 +145,7 @@ public class phase1react {
 	 */
 	public ArrayList<HashMap<String,String>> makeMultiPrediction(String supportFoldPath, String cyp, Instances testSet, ArrayList<HashMap<String,String>> predictedResult) throws Exception{
 		ArrayList<HashMap<String,String>> resultList = predictedResult;
+		
 		if(cyp.contains("1A2")){
 			String model = current_dir+"/Model/PhaseICypReactModel/CYP1A2/model/1A2_NR.model";
 			String supportfile = current_dir + "/Model/PhaseICypReactModel/CYP1A2/supportfile.csv";
@@ -198,6 +200,8 @@ public class phase1react {
 			//predict and store the results into the predictedResult arrayList
 			resultList = makePrediction("2A6",model,testSet,supportfile,resultList );
 		}
+		
+		
 		return resultList;
 	}
 	
