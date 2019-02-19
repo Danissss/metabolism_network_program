@@ -54,12 +54,12 @@ public class phase2react {
 		HashMap<String,String> classified_result = new HashMap<String,String>();
 		Classifier model = (Classifier) weka.core.SerializationHelper.read(substrate_model_path.get(enzyme_name));
 		double result = model.classifyInstance(instance.get(0));		
-		String key_string = String.format("%s_substrate", enzyme_name);
+		String key_string = String.format("%s", enzyme_name);
 		
 		if(result == 0.0) {
-			classified_result.put(key_string, "non-substrate");
+			classified_result.put(enzyme_name, "non-substrate");
 		}else {
-			classified_result.put(key_string, "substrate");
+			classified_result.put(enzyme_name, "substrate");
 		}
 		
 		

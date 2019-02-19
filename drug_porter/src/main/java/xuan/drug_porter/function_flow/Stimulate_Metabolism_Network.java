@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
+
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
@@ -66,11 +67,7 @@ public class Stimulate_Metabolism_Network {
 	public static void RunTest(String input) {
 		
 		
-		
-		
-		
-		
-		
+
 	}
 	
 	
@@ -80,10 +77,6 @@ public class Stimulate_Metabolism_Network {
 	 * @param input
 	 */
 	public static void RunStimulation(String input) {
-		
-		
-		
-		
 		
 		
 		
@@ -112,7 +105,8 @@ public class Stimulate_Metabolism_Network {
 		
 		
 		// keep record of the compound 
-		MetaboliteObject MO_input_compound = new MetaboliteObject(input);
+		MetaboliteObject MO_input_compound = new MetaboliteObject(input,input);
+		
 		
 		// keep record of all possible metabolites
 		ArrayList<String> possible_metabolite_all = new ArrayList<String>();
@@ -125,32 +119,40 @@ public class Stimulate_Metabolism_Network {
 		
 		String[] blood_stream_ports = new String[] {"SLC16A1","SLC10A2","SLC15A1","SLCO1A2","SLCO1B1","SLCO1B3","SLCO2A1","SLCO2B1"}; // enter enterocyte cell: cell line on intestine wall
 		HashMap<String,String> enter_enterocyte_result = new HashMap<String,String>();
-		int enter_enterocyte_number = 0;
+
 		for(int i = 0; i < blood_stream_ports.length; i++) {
 			HashMap<String,String> single_protein_result = RunClassification.run_classifier(substrate_instance, blood_stream_ports[i]);
 			for (String key : single_protein_result.keySet()) {
 				enter_enterocyte_result.put(key, single_protein_result.get(key));
+				
 				if(!single_protein_result.get(key).contains("non")) {
-					enter_enterocyte_number++;
+					MO_input_compound.AddTargetAsSubstrate(blood_stream_ports[i]);
 				}
 				
 		    }
 		}
 		
-		if(enter_enterocyte_number > 1) {
-			System.out.println("the compound enter enterocytes");
-		}else {
-			System.out.println("the compound can't enter enterocytes");
+		if(MO_input_compound.GetAllTargetSubstrate().size() > 0) {
+			System.out.println("Input compound enter enterocytes");
 		}
+		else {
+			System.out.println("Input compound can't enter enterocytes");
+		}
+		
+		
 		
 		// enter blood stream 
 		HashMap<String,String> ABCC3Result = RunClassification.run_classifier(substrate_instance, "ABCC3"); // only ABCC3 facilicate export from enterocyte to blood stream
 		for (String key : ABCC3Result.keySet()) {
 			if(ABCC3Result.get(key).contains("non")) {
-				System.out.println("the compound can't across enterocytes to enter blood stream");
+				System.out.println("Input compound can't across enterocytes to enter blood stream");
+			}else {
+				MO_input_compound.AddTargetAsSubstrate("ABCC3");
+				System.out.println("Input compound across enterocytes to enter blood stream");
 			}
 			
 	    }
+		
 		
 		
 		// enter liver cell for metabolism 
@@ -163,172 +165,268 @@ public class Stimulate_Metabolism_Network {
 			for (String key : tmp_enter_liver_result.keySet()) {
 				enter_liver_result.put(key, tmp_enter_liver_result.get(key));
 				if(!tmp_enter_liver_result.get(key).contains("non")) {
+					if(!MO_input_compound.GetAllTargetSubstrate().contains(enter_liver_cell_port[i])) {
+						MO_input_compound.AddTargetAsSubstrate(enter_liver_cell_port[i]);
+					}
+					
 					enter_liver_number++;
+					
 				}
 				
 		    }
 		}
 		
 		if(enter_liver_number > 1) {
-			System.out.println("the compound enter liver cell for potential metabolism");
+			System.out.println("Input compound enter liver cell for potential metabolism");
 		}else {
-			System.out.println("the compound can't enter liver cell");
+			System.out.println("Input compound can't enter liver cell");
 			// if can't enter the liver cell, then create the branch that determine if the compound will be execrted safely
 		}
 		
 		
-		// if the compound can enter cypreact
+		
+		
+		// if the compound can react with cyp via CypReact
+		// the cyp_enzyme_list can grow as well as CypReact list
 		String[] cyp_enzyme_list = new String[] {"CYP1A2","CYP2B6","CYP2A6","CYP2C8","CYP2C9","CYP2C19","CYP2D6","CYP2E1","CYP3A4"};
 		ArrayList<HashMap<String,String>> cypreact_result = phase1react.makePrediction("", String.format("SMILES=%?",input), "CYP1A2,CYP2B6,CYP2A6,CYP2C8,CYP2C9,CYP2C19,CYP2D6,CYP2E1,CYP3A4");
 		for(int i = 0; i< cypreact_result.size(); i++) {
 			HashMap<String,String> single_result = cypreact_result.get(i);
 			for (String key : single_result.keySet()) {
-//				enter_enterocyte_result.put(key, tmp_enter_liver_result.get(key));
-//				if(!tmp_enter_liver_result.get(key).contains("non")) {
-//					enter_liver_number++;
-//				}
-				System.out.println(key+" : " + single_result.get(key));
-				
-				
-				
-				
-//				
+				if(single_result.get(key) == "R") {
+					// TODO: need to change the return index
+					MO_input_compound.AddTargetAsSubstrate(cyp_enzyme_list[i]);
+				}
 		    }
 		}
 		
 		
 		// som and phase I transformation
-		Instances som_instance = SomPrediction.create_test_instance(input);
-		
 		// for substrate of CYP, run the som prediction
-		String[] substrate_canadidates = new String[9];
-		ArrayList<IAtomContainer> result_of_phaseI_substrate = new ArrayList<IAtomContainer>();
-		ArrayList<String> result_of_phaseI_substrate_smiles = new ArrayList<String>();
-		for(int i = 0; i < substrate_canadidates.length; i++) {
-			HashMap<Integer,String> som_phase1_result = SomPrediction.runSomClassifier(som_instance,substrate_canadidates[i]);
-			// this is map of som for each cyp
-			// create the new mol at this place and append to result_of_phaseI_substrate
-			for (Integer key : som_phase1_result.keySet()) {
-				if(som_phase1_result.get(key) == "Yes") {
-					IAtomContainer canadidate_substrate = PhaseITransformation.phaseItransformer(input_compound, key);
-					result_of_phaseI_substrate.add(canadidate_substrate);
+		// find which one is reactant, do the som prediction, do the phaseI transformation
+		ArrayList<MetaboliteObject> phaseImetabolites = new ArrayList<MetaboliteObject>();
+		Instances som_instance = SomPrediction.create_test_instance(input);
+		for(int i = 0; i < cyp_enzyme_list.length; i++) {
+			if(MO_input_compound.GetAllTargetSubstrate().contains(cyp_enzyme_list[i])) {
+				// it is substrate for this cyp
+				HashMap<Integer,String> som_phase1_result = SomPrediction.runSomClassifier(som_instance,cyp_enzyme_list[i]);
+				for (Integer key : som_phase1_result.keySet()) {
+					if(som_phase1_result.get(key) == "Yes") {
+						ArrayList<IAtomContainer> canadidate_substrate = PhaseITransformation.phaseItransformer(input_compound, key);
+						for(int k = 0; k < canadidate_substrate.size(); k++) {
+							String tmp_smiles = smigen.create(canadidate_substrate.get(k));
+							MetaboliteObject tmp_obj = new MetaboliteObject(tmp_smiles,input);
+										
+							// change the objects for parents
+							phaseImetabolites.add(tmp_obj);
+							MO_input_compound.AddChild(tmp_smiles);
+							
+						}
+					}
 					
-					
-					// append the metabolites of smiles to keep record
-					String tmp_smiles = smigen.create(canadidate_substrate);
-					result_of_phaseI_substrate_smiles.add(tmp_smiles);
-					possible_metabolite_all.add(tmp_smiles);
-				}
-				
-		    }
-		}
-		
-		
-		
-		//String key_string = String.format("%s_substrate", enzyme_name);
-		
-		//if(result == 0.0) {
-		//	classified_result.put(key_string, "non-substrate");
-		//}else {
-		//	classified_result.put(key_string, "substrate");
-		//}
-		
-		// phase II react
-		// run Original compound as well as compound from phaseI biotransformation
-		ArrayList<HashMap<String,String>> phaseII_result = new ArrayList<HashMap<String,String>>();
-		HashMap<String,String> original_compound_phaseII_result = phase2react.RunClassifierForAll(substrate_instance);
-		
-//		phaseII_result.add(phase2react.RunClassifierForAll(substrate_instance);
-		
-		for(int i = 0; i< result_of_phaseI_substrate_smiles.size(); i++) {
-			Instances temp_substrate_instance = RunClassification.generate_test_instance(result_of_phaseI_substrate_smiles.get(i), "substrate");
-			HashMap<String,String> temp_substrate_result_phaseII = phase2react.RunClassifierForAll(temp_substrate_instance);
-			phaseII_result.add(temp_substrate_result_phaseII);
-			
-		}
-		
-		
-		// phase II transformation: for different enzyme, do different function group adding;
-		// prediction for input compound 
-		for(String key: original_compound_phaseII_result.keySet()) {
-			if(original_compound_phaseII_result.get(key) == "substrate") {
-				// do transformation 
-				// IAtomContainer AddPhase2Group(IAtomContainer mole,  String enzyme_name,int som_site)
-				String temp_enzyme = key.split("_")[0];
-				ArrayList<Integer> som_phaseII = SomPredictionRule.GetSomPhaseII(input_compound);
-				for(int i = 0; i<som_phaseII.size(); i++) {
-					IAtomContainer tmp_container = FunctionalGroup.AddPhase2Group(input_compound,temp_enzyme,som_phaseII.get(i));
-					String tmp_smiles = smigen.create(tmp_container);
-					possible_metabolite_all.add(tmp_smiles);
-				}
-				
+			    }
 			}
 		}
 		
-		// prediction for phaseI metabolites
-		for(int i = 0; i < phaseII_result.size(); i++) {
+		
+		
+		
+	
+		
+		// phase II react
+		// and phase II biotransformation
+		// run Original compound as well as compound from phaseI biotransformation
+		ArrayList<MetaboliteObject> phaseIImetabolites = new ArrayList<MetaboliteObject>();
+		
+		// phaseII_result.add(phase2react.RunClassifierForAll(substrate_instance);
+		// each MetaboliteObject smiles will undergo phaseII_model_name
+		String[] phaseII_model_name = new String[] {"UGT","SULT","NAT","GST","COMT"};
+		for(int i = 0; i< phaseImetabolites.size(); i++) {
+			String current_metabolite_smiles = phaseImetabolites.get(i).SMILES;
+			Instances temp_substrate_instance = RunClassification.generate_test_instance(current_metabolite_smiles, "substrate");
+			IAtomContainer phaseImetabolite = GetAtomContainerFromSmiles(phaseImetabolites.get(i).SMILES);
 			
-			HashMap<String,String> phaseI_metabolite_result = phaseII_result.get(i);
-			for(String key: phaseI_metabolite_result.keySet()) {
-				if(phaseI_metabolite_result.get(key) == "substrate") {
-					// do transformation 
-					// IAtomContainer AddPhase2Group(IAtomContainer mole,  String enzyme_name,int som_site)
-					String temp_enzyme = key.split("_")[0];
-					ArrayList<Integer> som_phaseII = SomPredictionRule.GetSomPhaseII(input_compound);
-					for(int m = 0; m<som_phaseII.size(); m++) {
-						IAtomContainer tmp_container = FunctionalGroup.AddPhase2Group(input_compound,temp_enzyme,som_phaseII.get(m));
+			// get the result as <UGT, non-substrate/substrate>
+			for(int k = 0; k < phaseII_model_name.length; k++) {
+				HashMap<String,String> temp_substrate_result_phaseII = phase2react.RunClassifier(temp_substrate_instance,phaseII_model_name[k]);
+				for(String key: temp_substrate_result_phaseII.keySet()) {
+					if(temp_substrate_result_phaseII.get(key) == "substrate") {
+						// it is the substrate of the current enzyme 
+						System.out.println(String.format("% is substrate of %s.", phaseImetabolites.get(i).SMILES,key));
+						phaseImetabolites.get(i).AddTargetAsSubstrate(phaseII_model_name[k]);
 						
-						String tmp_smiles = smigen.create(tmp_container);
-						possible_metabolite_all.add(tmp_smiles);
+						
+						// do transformation
+						ArrayList<Integer> som_phaseII = SomPredictionRule.GetSomPhaseII(input_compound);
+						for(int m = 0; m < som_phaseII.size(); m++) {
+							IAtomContainer tmp_container = FunctionalGroup.AddPhase2Group(phaseImetabolite,phaseII_model_name[k],som_phaseII.get(m));
+							String tmp_smiles = smigen.create(tmp_container);
+							MetaboliteObject tmp_phaseII = new MetaboliteObject(tmp_smiles,current_metabolite_smiles);
+							phaseIImetabolites.add(tmp_phaseII);
+							
+							// add the child for current phaseImetabolite object
+							phaseImetabolites.get(i).AddChild(tmp_smiles);
+						}				
 					}
 				}
 			}
 		}
 		
 		
+		//concat all metabolties
+		ArrayList<MetaboliteObject> all_metabolites = new ArrayList<MetaboliteObject>();
+		all_metabolites.add(MO_input_compound);
+		all_metabolites.addAll(phaseImetabolites);
+		all_metabolites.addAll(phaseIImetabolites);
+		//concat all metabolties
 		
 		
-		// exportation from liver to blood == bioactive compound
-		String[] export_from_liver_to_blood = new String[] {};
-		for(int i = 0; i < possible_metabolite_all.size(); i++) {
-			Instances all_metabolites_instance = RunClassification.generate_test_instance(possible_metabolite_all.get(i), "substrate");
+		
+		
+		// execration from liver to blood == bioactive compound
+		// or execration from liver to bile == bio-inactive compound
+		String[] export_from_liver_to_blood = new String[] {"ABCC3","ABCC4","ABCC6"};										// exportation from liver to blood == bioactive compound
+		String[] export_from_liver_to_bile = new String[] {"ABCB1","ABCG2","ABCB11","ABCC2","SLC47A1"};    				//exportation from liver to bile == non-bioactive compound
+		ArrayList<String> export_from_liver_to_blood_result = new ArrayList<String>();  									// only care about the bioactive stuff; metabolites go to bile is bioinactive
+		for(int i = 0; i < all_metabolites.size(); i++) {
+			int bioactive_flag = 0;
+
+			
+			String current_metabolite_smiles = all_metabolites.get(i).GetSMILES();
+			Instances all_metabolites_instance = RunClassification.generate_test_instance(current_metabolite_smiles, "substrate");
+			// for each metabolites, test for each transporters
+			
+			
+			for (int k = 0; k < export_from_liver_to_blood.length; k++) {
+				HashMap<String,String> single_export_result = RunClassification.run_classifier(all_metabolites_instance, export_from_liver_to_blood[i]);
+				for (String key : single_export_result.keySet()) {
+					if(single_export_result.get(key) == "substrate") {
+						System.out.println(String.format("%s export from liver to blood by %s (bioactive).", current_metabolite_smiles, export_from_liver_to_blood[i]));
+						all_metabolites.get(i).BioActive(true);
+						
+						// add the transporter as substrate
+ 						if(!all_metabolites.get(i).GetAllTargetSubstrate().contains(export_from_liver_to_blood[i])) {
+							all_metabolites.get(i).AddChild(export_from_liver_to_blood[i]);
+						}
+ 						
+ 						bioactive_flag = 1;
+						
+					}
+					else {
+						System.out.println(String.format("%s doesn't export from liver to blood (bioactive).", current_metabolite_smiles));
+					}
+			    }
+			}
+			
+			
+			// for each metabolites, test for each transporters
+			for (int k = 0; k < export_from_liver_to_bile.length; k++) {
+				HashMap<String,String> single_export_result = RunClassification.run_classifier(all_metabolites_instance, export_from_liver_to_bile[i]);
+				for (String key : single_export_result.keySet()) {
+					if(single_export_result.get(key) == "substrate") {
+						System.out.println(String.format("%s export from liver to bile by %s (bio-inactive).", current_metabolite_smiles,export_from_liver_to_bile[i]));
+						
+						// add the transporter as substrate
+						if(!all_metabolites.get(i).GetAllTargetSubstrate().contains(export_from_liver_to_bile[i])) {
+							all_metabolites.get(i).AddChild(export_from_liver_to_bile[i]);
+						}
+					
+					}
+					
+					else {
+						System.out.println(String.format("%s doesn't export from liver to blood (bioactive).", current_metabolite_smiles));
+					}
+			    }
+			}
+			
+			// raise caution because the metabolites couldn't go out of liver: may damage the liver;
+			// 
+			
+			if (bioactive_flag == 1) {
+				if (all_metabolites.get(i).GetAllTargetSubstrate().contains("ABCC3")) {
+					System.out.println(String.format("Caustion: %s can produce bioactive metabolites.", current_metabolite_smiles));
+				}else {
+					System.out.println(String.format("Caustion: %s can't produce bioactive metabolites.", current_metabolite_smiles));
+				}
+			}
+			
+			
+			String[] exports_ = new String[] {"ABCC3","ABCC4","ABCC6","ABCB1","ABCG2","ABCB11","ABCC2","SLC47A1"};			
+			
 			
 		}
+		
+		
+		
 		
 		
 		
 		//blood to urine 
-		
-		ArrayList<IAtomContainer> metabolites_phase1 = new ArrayList<IAtomContainer>();
-		
-		String smiles = input;
-//		String smiles = String.format("SMILES=%s", input);
-		phase1react phase1sub = new phase1react();
-		ArrayList<HashMap<String,String>> result = phase1sub.makePrediction("", input, "CYP1A2");
-		for(int i = 0; i < result.size(); i++) {
-			String result1 = result.get(i).get("1A2");
-		}
-		
-		SomPrediction spd = new SomPrediction();
-		Instances instance = spd.create_test_instance(smiles);
-		HashMap<Integer,String> som_classifier = spd.runSomClassifier(instance, "CYP1A2");
-		ArrayList<Integer> som_phase1 = new ArrayList<Integer>();
-		for(Integer key: som_classifier.keySet()) {
-			som_phase1.add(key);
+		// metabolites will go from blood to kidney and then urine
+		// for those couldn't enter kidney, may also cause trouble
+		String[] enter_kidney_tubules = new String[] {"SLCO4C1","SLC22A6","SLC22A7","SLC22A8"};
+		ArrayList<String> enter_kidney_tubules_result = new ArrayList<String>();
+		for(int i = 0; i <export_from_liver_to_blood_result.size(); i++) {
+			Instances all_metabolites_instance = RunClassification.generate_test_instance(export_from_liver_to_blood_result.get(i), "substrate");
+			int enter_kidney_flag = 0;
+			for(int k = 0; k < enter_kidney_tubules.length; k++) {
+				HashMap<String,String> single_import_result = RunClassification.run_classifier(all_metabolites_instance, enter_kidney_tubules[i]);
+				for (String key : single_import_result.keySet()) {
+					if(single_import_result.get(key) == "substrate") {
+						System.out.println(String.format("%s import to kidney tubules by %s.", export_from_liver_to_blood_result.get(i),enter_kidney_tubules[i]));
+						enter_kidney_flag = 1;
+					}
+					else {
+						System.out.println(String.format("%s doesn't export from liver to blood (bioactive).", export_from_liver_to_blood_result.get(i)));
+					}
+			    }
+			}
 			
+			if(enter_kidney_flag == 1) {
+				enter_kidney_tubules_result.add(export_from_liver_to_blood_result.get(i));
+				
+			}
+
 		}
 		
+		// kidney tubules to urine
+		// don't care about reabsorption
 		
-		for(int i = 0; i < som_phase1.size(); i++) {
-			int som = som_phase1.get(i);
-			IAtomContainer mole = PhaseITransformation.phaseItransformer(input_compound, som);
-			metabolites_phase1.add(mole);
-			
+		String[] enter_urine = new String[] {"SLC22A11","SLC22A12","ABCC2","ABCC4","SLC47A1","SLC47A2","ABCB1","SLC22A4","SLC22A5"};
+		for(int i = 0; i <enter_kidney_tubules_result.size(); i++) {
+			Instances all_metabolites_instance = RunClassification.generate_test_instance(enter_kidney_tubules_result.get(i), "substrate");
+			for(int k = 0; k < enter_urine.length; k++) {
+				HashMap<String,String> single_import_result = RunClassification.run_classifier(all_metabolites_instance, enter_urine[i]);
+				for (String key : single_import_result.keySet()) {
+					if(single_import_result.get(key) == "substrate") {
+						System.out.println(String.format("%s exerted to urine by %s.", enter_kidney_tubules_result.get(i),enter_urine[i]));
+					}
+					
+			    }
+			}
 		}
-		
-		
 			
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -530,6 +628,7 @@ public class Stimulate_Metabolism_Network {
 //	 	SDFWriter sdw  = new SDFWriter(new FileWriter(tempFile));
 //	 	sdw.write(molecule_3D);
 //	 	sdw.close();
+
 	}
 
 }

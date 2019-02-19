@@ -11,6 +11,12 @@ public class MetaboliteObject {
 	public String ParentSMILES = new String();
 	public ArrayList<String> ChildSMILES = new ArrayList<String>();
 	public int NumberOfChild = new Integer(0);
+	public ArrayList<String> TargetSubstrate = new ArrayList<String>();
+	public ArrayList<String> TargetInhibitor = new ArrayList<String>();
+	public boolean bioactive = false;
+ 	
+	
+	
 	
 	/**
 	 * constructor 
@@ -51,6 +57,13 @@ public class MetaboliteObject {
 		
 	}
 	
+	
+	/**
+	 * Set BioActive as true
+	 */
+	public void BioActive(boolean what) {
+		this.bioactive = what;
+	}
 	
 	/**
 	 * each molecule can only have one parents
@@ -98,11 +111,95 @@ public class MetaboliteObject {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	public ArrayList<String> GetAllTargetSubstrate(){
+		return TargetSubstrate;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public ArrayList<String> GetAllTargetInhibitor(){
+		return TargetInhibitor;
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public void AddTargetAsSubstrate(String TargetName){
+		
+		if(!this.TargetSubstrate.contains(TargetName)) {
+			this.TargetSubstrate.add(TargetName);
+		}
+		
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public void AddTargetAsInhibitor(String TargetName){
+		
+		if(!this.TargetInhibitor.contains(TargetName)) {
+			this.TargetInhibitor.add(TargetName);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param TargetName
+	 */
+	public void RemoveTargetFromSubstrate(String TargetName) {
+		if (this.TargetSubstrate.contains(TargetName)){
+			this.TargetSubstrate.remove(TargetName);
+		}
+	}
+	
+	
+	/**
+	 * 
+	 * @param TargetName
+	 */
+	public void RemoveTargetFromInhibitor(String TargetName) {
+		if (this.TargetInhibitor.contains(TargetName)){
+			this.TargetInhibitor.remove(TargetName);
+		}
+	}
+	
+	
+	
+	/**
+	 * 
 	 * @param number
 	 */
 	private void UpdateNumberOfChild(int number) {
 		this.NumberOfChild = number;
 		
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	boolean IsRoot() {
+		if (this.SMILES == this.ParentSMILES) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	String GetSMILES() {
+		return this.SMILES;
 	}
 	
 

@@ -19,6 +19,7 @@ import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.io.listener.PropertiesListener;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
+import org.openscience.cdk.modeling.builder3d.ModelBuilder3D;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -44,15 +45,17 @@ public class SomPrediction {
 	 * @param input
 	 * @return
 	 * @throws CDKException 
+	 * @throws CloneNotSupportedException 
 	 * @throws FileNotFoundException 
 	 */
-	public static Instances create_test_instance(String input) throws CDKException, IOException {
+	public static Instances create_test_instance(String input) throws CDKException, IOException, CloneNotSupportedException {
 		
 		
 		int nearest_atom = 3;
 		
 		IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
 		IAtomContainer original_mole = builder.newInstance(IAtomContainer.class);
+		IAtomContainer molecule_3D = builder.newInstance(IAtomContainer.class);
 //		HashMap<IAtomContainer, Instances> hash_instance = new HashMap<IAtomContainer, Instances>();
 //		ArrayList<Instance> instance_list = new ArrayList<Instance>();
 		
@@ -69,12 +72,17 @@ public class SomPrediction {
 			sdg.setMolecule(atom_container);
 			sdg.generateCoordinates();
 			original_mole = sdg.getMolecule();
+			
+			
+			ModelBuilder3D mb3d = ModelBuilder3D.getInstance(builder);
+			molecule_3D = mb3d.generate3DCoordinates(original_mole, false);
 	    }
-//	    System.out.println(mole.getAtomCount()); //read smiles string
-	    // add hydrogen 
-//	    AtomContainerManipulator.convertImplicitToExplicitHydrogens(mole);
-	    IAtomContainer mole = AtomContainerManipulator.removeHydrogens(original_mole);
-	    System.out.println(mole.getAtomCount());
+
+	    
+	    
+	    
+	    IAtomContainer mole = AtomContainerManipulator.removeHydrogens(molecule_3D);
+	    
 	    ArrayList<Attribute> attribute_name = generate_attribute_name(nearest_atom+1, 29); 
 	     
 	    FastVector<String> association = new FastVector<String>();

@@ -63,7 +63,7 @@ public class FunctionalGroup {
 			smiles_string = UGT;
 		}
 		else if(enzyme_name == "NAT"){
-			start_index = som_map_phaseII.get(NAT);
+			start_index = som_map_phaseII.get(enzyme_name);
 			smiles_string = NAT;
 		}
 		else if(enzyme_name == "GST"){
