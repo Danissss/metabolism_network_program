@@ -150,9 +150,11 @@ public class RunClassification {
 	
 	/**
 	 * return all transporter model result
+	 * @deprecated
 	 * @param instance
 	 * @return
 	 * @throws Exception 
+	 * 
 	 */
 	
 	public static HashMap<String,String> run_classifier_for_all_transporter(Instances instance) throws Exception {
@@ -162,7 +164,7 @@ public class RunClassification {
 		
 		for(int i=0 ; i<model_name.length; i++) {
 			String s_model_name = model_name[i];
-			HashMap<String,String> getback_result = run_classifier(instance,s_model_name);
+			HashMap<String,String> getback_result = run_classifier(instance,s_model_name,"substrate");
 			for (Map.Entry<String,String> entry : getback_result.entrySet()){
 				result.put(entry.getKey(), entry.getValue());
 			}
@@ -178,29 +180,37 @@ public class RunClassification {
 	 * Get single transporter model 
 	 * @param input
 	 * @param transporter_name
+	 * @param model_type inhibitor substrate
 	 * @return
 	 * @throws Exception
 	 */
-	public static HashMap<String,String> run_classifier(Instances instance, String transporter_name) throws Exception{
+	public static HashMap<String,String> run_classifier(Instances instance, String transporter_name,String model_type) throws Exception{
 		
 		HashMap<String,String> classified_result = new HashMap<String,String>();
 		
-		Classifier MDR1_substrate_model = (Classifier) weka.core.SerializationHelper.read(substrate_model_path.get(transporter_name));
-		double substrate_result = MDR1_substrate_model.classifyInstance(instance.get(0));
-		Classifier MDR1_inhibitor_model = (Classifier) weka.core.SerializationHelper.read(inhibitor_model_path.get(transporter_name));
-		double inhibitor_result = MDR1_inhibitor_model.classifyInstance(instance.get(0));
-		String substrate = String.format("%s_substrate", transporter_name);
-		String inhibitor = String.format("%s_inhibitor", transporter_name);
-		if(substrate_result == 0.0) {
-			classified_result.put(substrate, "non-substrate");
+		if(model_type == "substrate") {
+			Classifier MDR1_substrate_model = (Classifier) weka.core.SerializationHelper.read(substrate_model_path.get(transporter_name));
+			double substrate_result = MDR1_substrate_model.classifyInstance(instance.get(0));
+			String substrate = String.format("%s", transporter_name);
+			if(substrate_result == 0.0) {
+				classified_result.put(substrate, "non-substrate");
+			}
+			else {
+				classified_result.put(substrate, "substrate");
+			}
 		}
-		else {
-			classified_result.put(substrate, "substrate");
-		}
-		if(inhibitor_result == 0.0) {
-			classified_result.put(inhibitor, "non-inhibitor");
-		}else {
-			classified_result.put(inhibitor, "inhibitor");
+		else if (model_type == "inhibitor") {
+			Classifier MDR1_inhibitor_model = (Classifier) weka.core.SerializationHelper.read(inhibitor_model_path.get(transporter_name));
+			double inhibitor_result = MDR1_inhibitor_model.classifyInstance(instance.get(0));
+			
+			String inhibitor = String.format("%s", transporter_name);
+			
+			if(inhibitor_result == 0.0) {
+				classified_result.put(inhibitor, "non-inhibitor");
+			}else {
+				classified_result.put(inhibitor, "inhibitor");
+			}
+			
 		}
 		
 		return classified_result;
@@ -339,7 +349,7 @@ public class RunClassification {
 			String transporter_name = args[1];
 			String input = args[0];
 			Instances instance = generate_test_instance(input,"substrate");
-			HashMap<String,String> result = run_classifier(instance,transporter_name);
+			HashMap<String,String> result = run_classifier(instance,transporter_name,"substrate");
 			for (String key : result.keySet()) {
 				String result_each = result.get(key).toString();
 				String result_key = key;

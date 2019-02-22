@@ -24,7 +24,7 @@ public class phase1inhibitor {
 	 * @throws Exception 
 	 */
 	
-	public static HashMap<String,String> run_classifier_for_all_transporter(Instances instance) throws Exception {
+	public static HashMap<String,String> run_classifier_for_all_cyp(Instances instance) throws Exception {
 		
 		HashMap<String,String> result =  new HashMap<String,String>();
 		String[] model_name = new String[] {"CYP1A2","CYP2A6","CYP2B6","CYP2C8","CYP2C9","CYP2C19","CYP2C19","CYP2D6","CYP2E1","CYP3A4"};
@@ -55,7 +55,7 @@ public class phase1inhibitor {
 		HashMap<String,String> classified_result = new HashMap<String,String>();
 		Classifier model = (Classifier) weka.core.SerializationHelper.read(inhibitor_model_path.get(enzyme_name));
 		double result = model.classifyInstance(instance.get(0));		
-		String key_string = String.format("%s_inhibitor", enzyme_name);
+		String key_string = String.format("%s", enzyme_name);
 		
 		if(result == 0.0) {
 			classified_result.put(key_string, "non-inhibitor");

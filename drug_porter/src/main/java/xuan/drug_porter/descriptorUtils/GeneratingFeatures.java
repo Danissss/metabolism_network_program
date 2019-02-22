@@ -55,7 +55,12 @@ import org.openscience.cdk.fingerprint.PubchemFingerprinter;
 
 public class GeneratingFeatures
 {
-	
+	/**
+	 * Generate feature name by given single atomContainer 
+	 * @param mole
+	 * @return
+	 * @throws Exception
+	 */
 	public ArrayList<Attribute> generateAllAttributes(IAtomContainer mole) throws Exception{
 		
 		 ArrayList<Attribute> atts = new ArrayList<Attribute>();
@@ -90,18 +95,23 @@ public class GeneratingFeatures
 			 Attribute attr = new Attribute(maccs_fp);
 			 atts.add(attr);
 		 }
-//		 
-//		 
-//		 String[] total_feature = final_attributes.split(",");
-//			System.out.println(total_feature.length);
 		 
-		
-//		System.out.println("Total attribute value= " +atts.size());
+		 
+		 
 		return atts;
 		
 		
 	}
 	
+	
+	
+	/**
+	 * 
+	 * @param mole
+	 * @param CalculatingType
+	 * @return
+	 * @throws Exception
+	 */
 	public String generateAllFeatures(IAtomContainer mole, String CalculatingType) throws Exception{
 		
 		 ArrayList<Attribute> atts = new ArrayList<Attribute>();
